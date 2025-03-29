@@ -1,0 +1,14 @@
+{
+  "name": "phishguard",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "install:python": "pip install -r backend/requirements.txt",
+    "dev": "npm run install:python && concurrently \"npm run dev --prefix frontend/phishguard-frontend\" \"npm run dev --prefix backend\"",
+    "dev:frontend": "next dev --prefix frontend/phishguard-frontend",
+    "dev:backend": "uvicorn backend.main:app --reload"  
+  },
+  "dependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

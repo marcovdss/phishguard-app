@@ -1,0 +1,45 @@
+# Node.js
+/node_modules
+/npm-debug.log
+/yarn-error.log
+/dist
+/build
+/.next
+/.nuxt
+/coverage
+/.env
+*.local
+
+# Python
+/.venv
+/venv
+__pycache__/
+/*.pyc
+/*.pyo
+/*.pyd
+*.sqlite3
+*.db
+*.log
+*.env
+
+# VSCode
+.vscode/
+
+# MacOS
+.DS_Store
+
+# Linux
+*~
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# JetBrains IDEs
+.idea/
+
+# Docker
+.docker/
+
+# Other
+*.swp
