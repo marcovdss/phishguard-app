@@ -1,3 +1,7 @@
+import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'backend')))
+
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from checker.blacklist import check_blacklist, check_virustotal

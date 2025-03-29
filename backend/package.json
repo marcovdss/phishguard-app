@@ -1,13 +1,12 @@
 {
-    "name": "phishguard-backend",
-    "version": "0.1.0",
-    "private": true,
-    "scripts": {
-      "dev": "uvicorn main:app --reload"
-    },
-    "dependencies": {
-      "uvicorn": "^0.18.2",
-      "fastapi": "^0.75.0"
-    }
+  "name": "phishguard-backend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "uvicorn main:app --reload"
+  },
+  "dependencies": {
+    "uvicorn": "^0.18.2",
+    "fastapi": "^0.75.0"
   }
-  
+}

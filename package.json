@@ -3,10 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "install:python": "pip install -r backend/requirements.txt",
-    "dev": "npm run install:python && concurrently \"npm run dev --prefix frontend/phishguard-frontend\" \"npm run dev --prefix backend\"",
-    "dev:frontend": "next dev --prefix frontend/phishguard-frontend",
-    "dev:backend": "uvicorn backend.main:app --reload"  
+    "install:python": "cd backend && pip install -r requirements.txt",
+    "install:frontend": "cd frontend/phishguard-frontend && npm install",
+    "install": "npm run install:python && npm run install:frontend",
+    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
+    "dev:frontend": "cd frontend/phishguard-frontend && next dev",
+    "dev:backend": "cd backend && uvicorn main:app --reload"
   },
   "dependencies": {
     "concurrently": "^9.1.2"
