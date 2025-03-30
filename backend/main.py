@@ -1,57 +1,63 @@
 import os
 import sys
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'backend')))
-
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from checker.blacklist import check_blacklist, check_virustotal
 from checker.check_ssl import check_ssl
 from checker.whois_lookup import get_whois_info
 from checker.check_tld import check_tld
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi import Request
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'backend')))
 
 app = FastAPI()
 
-# Add CORS middleware
+# CORS Middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins (or specify specific ones)
+    allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["*"],  # Allow all methods (GET, POST, etc.)
-    allow_headers=["*"],  # Allow all headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
+# Modelo Pydantic para entrada de dados
 class URLRequest(BaseModel):
     url: str
 
+# Endpoint POST utilizando Pydantic para validar o corpo da requisição
 @app.post("/verify-url")
-@app.get("/verify-url")  # Added GET method to handle query params
-async def verify_url(request: URLRequest = None, url: str = None):
-    if not request and not url:
-        raise HTTPException(status_code=400, detail="URL parameter is required.")
-    
-    url = request.url if request else url  # Fallback to query parameter if no body
+async def verify_url(request: URLRequest):
+    url = request.url
 
-    result = {}
+    result = {
+        "google_safe_browsing": "Malicious" if check_blacklist(url) else "Safe",
+        "virustotal": "Malicious" if check_virustotal(url) else "Safe",
+        "ssl": "Invalid or Expired",
+        "ssl_days_remaining": None,
+        "tld": "Invalid",
+        "whois": None,
+    }
 
-    # Check Google Safe Browsing
-    result["google_safe_browsing"] = "Malicious" if check_blacklist(url) else "Safe"
-
-    # Check VirusTotal
-    result["virustotal"] = "Malicious" if check_virustotal(url) else "Safe"
-
-    # Check SSL and return status along with days remaining
+    # Verifica SSL
     ssl_info = check_ssl(url)
-    result["ssl"] = ssl_info["status"]  # Simplified status ("Valid" or "Invalid or Expired")
-    result["ssl_days_remaining"] = ssl_info["days_remaining"]  # Number of days remaining
+    if ssl_info:
+        result["ssl"] = ssl_info.get("status", "Invalid or Expired")
+        result["ssl_days_remaining"] = ssl_info.get("days_remaining")
 
-    # Check TLD
-    tld_valid = check_tld(url)
-    result["tld"] = "Valid" if tld_valid else "Invalid"
+    # Verifica TLD
+    if check_tld(url):
+        result["tld"] = "Valid"
 
-    # Get WHOIS info
+    # Obtém informações WHOIS
     whois_info = get_whois_info(url)
-    result["whois"] = whois_info if "error" not in whois_info else None
+    if whois_info and "error" not in whois_info:
+        result["whois"] = whois_info
 
     return result
+
+# Endpoint GET para facilitar requisições via query params
+@app.get("/verify-url")
+async def verify_url_get(url: str):
+    request_data = URLRequest(url=url)
+    return await verify_url(request_data)
