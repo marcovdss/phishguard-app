@@ -1,14 +1,8 @@
 import React from 'react';
+import { VerificationResult } from '../types';
 
 interface VerificationResultsProps {
-  result: {
-    google_safe_browsing: string;
-    virustotal: string;
-    ssl: string;
-    ssl_days_remaining: number;
-    tld: string;
-    whois?: Record<string, string>;
-  };
+  result: VerificationResult;
 }
 
 const VerificationResults: React.FC<VerificationResultsProps> = ({ result }) => {
@@ -29,7 +23,7 @@ const VerificationResults: React.FC<VerificationResultsProps> = ({ result }) => 
               {result.google_safe_browsing}
             </span>
           </div>
-          <p className="text-sm text-gray-400">Checks URL against Google's blacklist.</p>
+          <p className="text-sm text-gray-400">Checks URL against Google&apos;s blacklist.</p>
         </div>
 
         {/* VirusTotal */}
@@ -52,10 +46,10 @@ const VerificationResults: React.FC<VerificationResultsProps> = ({ result }) => 
             </span>
           </div>
           {result.ssl_days_remaining ? (
-             <div className="mt-2">
-               <span className="text-2xl font-bold">{result.ssl_days_remaining}</span>
-               <span className="text-sm text-gray-400 ml-2">days remaining</span>
-             </div>
+            <div className="mt-2">
+              <span className="text-2xl font-bold">{result.ssl_days_remaining}</span>
+              <span className="text-sm text-gray-400 ml-2">days remaining</span>
+            </div>
           ) : (
             <p className="text-sm text-red-400 mt-2">Certificate invalid or missing</p>
           )}

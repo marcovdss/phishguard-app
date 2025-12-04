@@ -1,26 +1,15 @@
 "use client";
 import { useState } from "react";
-import axios from "axios";
+import { PhishGuardAPI } from "./lib/api";
+import { VerificationResult } from "./types";
 import VerificationResults from "./components/VerificationResults";
-
-// Define the interface for verification results
-interface VerificationResult {
-  google_safe_browsing: string;
-  virustotal: string;
-  ssl: string;
-  ssl_days_remaining: number;
-  tld: string;
-  whois?: Record<string, string>;
-}
+import "./styles/globals.css";
 
 export default function Home() {
   const [url, setUrl] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<VerificationResult | null>(null);
-
-  // API URL, with fallback to localhost if not defined
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
   const handleSubmit = async () => {
     if (!url) {
@@ -30,13 +19,14 @@ export default function Home() {
 
     setError(null);
     setLoading(true);
-    setResult(null); // Clear previous results
+    setResult(null);
 
     try {
-      const response = await axios.post(`${API_URL}/verify-url`, { url });
-      setResult(response.data);
+      const data = await PhishGuardAPI.verifyURL(url);
+      setResult(data);
     } catch (err) {
       setError("An error occurred while verifying the URL. Please try again.");
+      console.error("Verification error:", err);
     } finally {
       setLoading(false);
     }

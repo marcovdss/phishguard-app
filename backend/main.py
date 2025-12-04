@@ -1,18 +1,27 @@
+"""
+PhishGuard API - Main application entry point
+"""
 import os
 import sys
-from fastapi import FastAPI, HTTPException
+# import logging # Removed unused import
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from checker.blacklist import check_blacklist, check_virustotal
-from checker.check_ssl import check_ssl
-from checker.whois_lookup import get_whois_info
-from checker.check_tld import check_tld
+from app.api.routes import router
+from app.core.logger import setup_logger
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'backend')))
+sys.path.append(os.path.dirname(__file__))
 
-app = FastAPI()
+# Configure logging
+logger = setup_logger(__name__)
 
-# CORS Middleware
+app = FastAPI(
+    title="PhishGuard API",
+    description="URL verification and threat intelligence API",
+    version="1.0.0"
+)
+
+# CORS Middleware - Allow all origins for development
+# TODO: Restrict origins in production
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -21,68 +30,27 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Modelo Pydantic para entrada de dados
-class URLRequest(BaseModel):
-    url: str
+# Include API routes
+app.include_router(router, tags=["verification"])
 
-# Endpoint POST utilizando Pydantic para validar o corpo da requisição
-@app.post("/verify-url")
-async def verify_url(request: URLRequest):
-    url = request.url
 
-    result = {
-        "google_safe_browsing": "Safe",
-        "virustotal": "Safe",
-        "ssl": "Invalid or Expired",
-        "ssl_days_remaining": None,
-        "tld": "Invalid",
-        "whois": None,
+@app.on_event("startup")
+async def startup_event():
+    """Log application startup"""
+    logger.info("PhishGuard API starting up...")
+
+
+@app.get("/")
+async def root():
+    """Root endpoint - API information"""
+    return {
+        "message": "PhishGuard API",
+        "version": "1.0.0",
+        "docs": "/docs"
     }
 
-    # Verifica Google Safe Browsing
-    try:
-        if check_blacklist(url):
-            result["google_safe_browsing"] = "Malicious"
-    except Exception as e:
-        print(f"Error checking Google Safe Browsing: {e}")
-        result["google_safe_browsing"] = "Error"
 
-    # Verifica VirusTotal
-    try:
-        if check_virustotal(url):
-            result["virustotal"] = "Malicious"
-    except Exception as e:
-        print(f"Error checking VirusTotal: {e}")
-        result["virustotal"] = "Error"
-
-    # Verifica SSL
-    try:
-        ssl_info = check_ssl(url)
-        if ssl_info:
-            result["ssl"] = ssl_info.get("status", "Invalid or Expired")
-            result["ssl_days_remaining"] = ssl_info.get("days_remaining")
-    except Exception as e:
-        print(f"Error checking SSL: {e}")
-
-    # Verifica TLD
-    try:
-        if check_tld(url):
-            result["tld"] = "Valid"
-    except Exception as e:
-        print(f"Error checking TLD: {e}")
-
-    # Obtém informações WHOIS
-    try:
-        whois_info = get_whois_info(url)
-        if whois_info and "error" not in whois_info:
-            result["whois"] = whois_info
-    except Exception as e:
-        print(f"Error getting WHOIS info: {e}")
-
-    return result
-
-# Endpoint GET para facilitar requisições via query params
-@app.get("/verify-url")
-async def verify_url_get(url: str):
-    request_data = URLRequest(url=url)
-    return await verify_url(request_data)
+@app.get("/health")
+async def health_check():
+    """Health check endpoint"""
+    return {"status": "healthy"}
