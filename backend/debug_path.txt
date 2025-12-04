@@ -1,1 +1,0 @@
-['', 'C:\\Python313\\python313.zip', 'C:\\Python313\\DLLs', 'C:\\Python313\\Lib', 'C:\\Python313', 'C:\\Users\\Marco\\AppData\\Roaming\\Python\\Python313\\site-packages', 'C:\\Python313\\Lib\\site-packages']

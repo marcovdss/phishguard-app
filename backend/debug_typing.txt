@@ -1,2 +1,0 @@
-Has Self: True
-File: C:\Python313\Lib\typing.py

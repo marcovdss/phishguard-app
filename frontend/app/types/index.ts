@@ -6,6 +6,7 @@ export interface VerificationResult {
     ssl: string;
     ssl_days_remaining: number | null;
     tld: string;
+    phishtank?: string;
     whois?: Record<string, string>;
 }
 

@@ -6,21 +6,28 @@ from app.models.schemas import URLRequest, VerificationResponse
 from app.services.blacklist import check_blacklist, check_virustotal
 from app.services.ssl_checker import check_ssl
 from app.services.whois_service import get_whois_info
+from app.services.phishtank_service import check_phishtank
 from app.services.tld_checker import check_tld
 from app.core.utils import validate_url, normalize_url
 from app.core.logger import setup_logger
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+from starlette.requests import Request
 
 router = APIRouter()
 logger = setup_logger(__name__)
+limiter = Limiter(key_func=get_remote_address)
 
 
 @router.post("/verify-url", response_model=VerificationResponse)
-async def verify_url(request: URLRequest):
+@limiter.limit("10/minute")
+async def verify_url(request: Request, url_request: URLRequest):
     """
     Verify a URL against multiple security services
 
     Args:
-        request: URLRequest containing the URL to verify
+        request: The request object (needed for rate limiting)
+        url_request: URLRequest containing the URL to verify
 
     Returns:
         VerificationResponse with results from all security checks
@@ -28,7 +35,26 @@ async def verify_url(request: URLRequest):
     Raises:
         HTTPException: If URL is invalid
     """
-    url = request.url.strip()
+    return await process_verification(url_request)
+
+
+@router.get("/verify-url", response_model=VerificationResponse)
+async def verify_url_get(url: str):
+    """
+    Verify a URL via GET request (convenience endpoint)
+
+    Args:
+        url: URL to verify (query parameter)
+
+    Returns:
+        VerificationResponse with results from all security checks
+    """
+    request_data = URLRequest(url=url)
+    return await process_verification(request_data)
+
+
+async def process_verification(url_request: URLRequest):
+    url = url_request.url.strip()
 
     # Validate URL format
     is_valid, error_message = validate_url(url)
@@ -98,20 +124,15 @@ async def verify_url(request: URLRequest):
     except Exception as e:
         logger.error(f"Error getting WHOIS info: {e}")
 
+    # Check PhishTank
+    try:
+        if check_phishtank(normalized_url):
+            result["phishtank"] = "Malicious"
+        else:
+            result["phishtank"] = "Safe"
+    except Exception as e:
+        logger.error(f"Error checking PhishTank: {e}")
+        result["phishtank"] = "Error"
+
     logger.info(f"Verification completed for URL: {normalized_url}")
     return result
-
-
-@router.get("/verify-url", response_model=VerificationResponse)
-async def verify_url_get(url: str):
-    """
-    Verify a URL via GET request (convenience endpoint)
-
-    Args:
-        url: URL to verify (query parameter)
-
-    Returns:
-        VerificationResponse with results from all security checks
-    """
-    request_data = URLRequest(url=url)
-    return await verify_url(request_data)

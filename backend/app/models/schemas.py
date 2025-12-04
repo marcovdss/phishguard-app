@@ -14,4 +14,5 @@ class VerificationResponse(BaseModel):
     ssl: str
     ssl_days_remaining: Optional[int]
     tld: str
+    phishtank: Optional[str] = None
     whois: Optional[Dict[str, str]]

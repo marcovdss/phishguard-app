@@ -1,6 +1,0 @@
-.\app\services\ssl_checker.py:8:1: F401 'typing.Optional' imported but unused
-.\app\services\whois_service.py:6:1: F401 'typing.Any' imported but unused
-.\main.py:6:1: F401 'logging' imported but unused
-.\tests\conftest.py:7:1: F401 'unittest.mock.Mock' imported but unused
-.\tests\conftest.py:7:1: F401 'unittest.mock.patch' imported but unused
-.\tests\test_routes.py:5:1: F401 'unittest.mock.Mock' imported but unused

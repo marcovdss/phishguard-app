@@ -65,6 +65,17 @@ const VerificationResults: React.FC<VerificationResultsProps> = ({ result }) => 
           </div>
           <p className="text-sm text-gray-400">Top-Level Domain validity check.</p>
         </div>
+
+        {/* PhishTank */}
+        <div className="glass-panel result-card">
+          <div className="card-header">
+            <span className="card-title">PhishTank</span>
+            <span className={`status-badge ${getStatusClass(result.phishtank || "Safe")}`}>
+              {result.phishtank || "Safe"}
+            </span>
+          </div>
+          <p className="text-sm text-gray-400">Community-based phishing verification.</p>
+        </div>
       </div>
 
       {/* WHOIS Info */}
