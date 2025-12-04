@@ -8,11 +8,15 @@ PhishGuard is a professional, full-stack URL verification tool designed to prote
 - **🔍 Multi-Source Verification**: 
   - Google Safe Browsing API
   - VirusTotal Analysis
+  - PhishTank Database
   - SSL Certificate Validation
   - TLD (Top-Level Domain) Verification
   - WHOIS Registration Data
 - **⚡ Real-time Analysis**: Instant feedback with visual status indicators
 - **🛡️ Robust Error Handling**: Graceful failure handling for all external services
+- **🔒 Enhanced Security**:
+  - Rate Limiting (10 requests/minute)
+  - HTTP Security Headers (HSTS, CSP, X-Frame-Options)
 - **📱 Responsive Design**: Works seamlessly on desktop and mobile devices
 
 ## Project Structure
@@ -20,13 +24,16 @@ PhishGuard is a professional, full-stack URL verification tool designed to prote
 ```
 phishguard-app/
 ├── backend/           # FastAPI application
-│   ├── checker/       # Verification modules
-│   ├── main.py        # API endpoints
+│   ├── app/           # Application source code
+│   │   ├── api/       # API routes
+│   │   ├── core/      # Config and logging
+│   │   ├── models/    # Pydantic models
+│   │   └── services/  # Business logic
+│   ├── main.py        # Entry point
 │   └── requirements.txt
 ├── frontend/          # Next.js application
-│   └── phishguard-frontend/
-│       ├── app/       # App router pages & components
-│       └── public/    # Static assets
+│   ├── app/           # App router pages & components
+│   └── public/        # Static assets
 └── package.json       # Root scripts
 ```
 
@@ -85,7 +92,7 @@ python -m uvicorn main:app --reload
 
 **Frontend only:**
 ```bash
-cd frontend/phishguard-frontend
+cd frontend
 npm run dev
 ```
 
@@ -108,6 +115,8 @@ npm run dev
 - **FastAPI** - Modern Python web framework
 - **Uvicorn** - ASGI server
 - **Pydantic** - Data validation
+- **SlowAPI** - Rate limiting
+- **Secure** - HTTP security headers
 - **python-whois** - Domain registration lookup
 - **BeautifulSoup4** - HTML parsing
 - **Requests** - HTTP library
@@ -129,6 +138,7 @@ Verify a URL against multiple security services.
 {
   "google_safe_browsing": "Safe",
   "virustotal": "Safe",
+  "phishtank": "Safe",
   "ssl": "Valid",
   "ssl_days_remaining": 365,
   "tld": "Valid",
@@ -154,7 +164,7 @@ Alternative GET endpoint for convenience.
 
 ### Frontend fails to start
 - Ensure Node.js is installed
-- Try running `npm install` in `frontend/phishguard-frontend`
+- Try running `npm install` in `frontend`
 - Check if port 3000 is already in use
 
 ### API checks return "Error"
