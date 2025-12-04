@@ -88,20 +88,6 @@ npm run dev
 ```bash
 cd backend
 python -m uvicorn main:app --reload
-```
-
-**Frontend only:**
-```bash
-cd frontend
-npm run dev
-```
-
-## Usage
-
-1. Open http://localhost:3000 in your browser
-2. Enter a URL to verify (e.g., `google.com` or `example.com`)
-3. Click "Verify" or press Enter
-4. View comprehensive security analysis in the results cards
 
 ## Technology Stack
 

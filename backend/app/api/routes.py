@@ -16,7 +16,7 @@ from starlette.requests import Request
 
 router = APIRouter()
 logger = setup_logger(__name__)
-limiter = Limiter(key_func=get_remote_address)
+from app.core.limiter import limiter
 
 
 @router.post("/verify-url", response_model=VerificationResponse)
