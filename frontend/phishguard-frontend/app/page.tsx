@@ -30,11 +30,13 @@ export default function Home() {
 
     setError(null);
     setLoading(true);
+    setResult(null); // Clear previous results
+
     try {
       const response = await axios.post(`${API_URL}/verify-url`, { url });
       setResult(response.data);
     } catch (err) {
-      setError("An error occurred while verifying the URL.");
+      setError("An error occurred while verifying the URL. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -46,49 +48,44 @@ export default function Home() {
     }
   };
 
-  // Check if results exist for conditional rendering
-  const hasResults =
-    result?.google_safe_browsing ||
-    result?.virustotal ||
-    result?.ssl ||
-    result?.whois;
-
   return (
-    <div className={`container ${hasResults ? "with-results" : "without-results"}`}>
-      <div className="form-container">
-        <h1 className="heading">
-          PhishGuard - <span className="subheading">URL Verifier</span>
-        </h1>
-
-        <div className="input-container">
-          <input
-            type="text"
-            placeholder="Enter URL"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            onKeyDown={handleKeyDown} // Handle 'Enter' key press
-            className="input-field"
-          />
-        </div>
-
-        <div className="button-container">
-          <button
-            onClick={handleSubmit}
-            disabled={loading}
-            className="submit-button"
-          >
-            {loading ? "Verifying..." : "Verify URL"}
-          </button>
-        </div>
-
-        {error && <p className="error-message">{error}</p>}
+    <main className="container">
+      <div className="text-center mt-10">
+        <h1>PhishGuard</h1>
+        <p className="subtitle">
+          Advanced real-time URL verification and threat intelligence.
+          Protect yourself from phishing and malicious websites.
+        </p>
       </div>
 
-      {hasResults && (
-        <div className="results-container">
-          <VerificationResults result={result} />
+      <div className="search-box">
+        <input
+          type="text"
+          placeholder="Enter URL to verify (e.g., google.com)"
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          onKeyDown={handleKeyDown}
+          className={`input-field ${loading ? 'loading-pulse' : ''}`}
+          disabled={loading}
+        />
+        <button
+          onClick={handleSubmit}
+          disabled={loading}
+          className="submit-button"
+        >
+          {loading ? "Scanning..." : "Verify"}
+        </button>
+      </div>
+
+      {error && (
+        <div className="glass-panel" style={{ padding: '1rem', color: 'var(--error)', borderRadius: 'var(--radius-sm)' }}>
+          ⚠️ {error}
         </div>
       )}
-    </div>
+
+      {result && (
+        <VerificationResults result={result} />
+      )}
+    </main>
   );
 }

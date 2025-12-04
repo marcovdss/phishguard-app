@@ -31,28 +31,53 @@ async def verify_url(request: URLRequest):
     url = request.url
 
     result = {
-        "google_safe_browsing": "Malicious" if check_blacklist(url) else "Safe",
-        "virustotal": "Malicious" if check_virustotal(url) else "Safe",
+        "google_safe_browsing": "Safe",
+        "virustotal": "Safe",
         "ssl": "Invalid or Expired",
         "ssl_days_remaining": None,
         "tld": "Invalid",
         "whois": None,
     }
 
+    # Verifica Google Safe Browsing
+    try:
+        if check_blacklist(url):
+            result["google_safe_browsing"] = "Malicious"
+    except Exception as e:
+        print(f"Error checking Google Safe Browsing: {e}")
+        result["google_safe_browsing"] = "Error"
+
+    # Verifica VirusTotal
+    try:
+        if check_virustotal(url):
+            result["virustotal"] = "Malicious"
+    except Exception as e:
+        print(f"Error checking VirusTotal: {e}")
+        result["virustotal"] = "Error"
+
     # Verifica SSL
-    ssl_info = check_ssl(url)
-    if ssl_info:
-        result["ssl"] = ssl_info.get("status", "Invalid or Expired")
-        result["ssl_days_remaining"] = ssl_info.get("days_remaining")
+    try:
+        ssl_info = check_ssl(url)
+        if ssl_info:
+            result["ssl"] = ssl_info.get("status", "Invalid or Expired")
+            result["ssl_days_remaining"] = ssl_info.get("days_remaining")
+    except Exception as e:
+        print(f"Error checking SSL: {e}")
 
     # Verifica TLD
-    if check_tld(url):
-        result["tld"] = "Valid"
+    try:
+        if check_tld(url):
+            result["tld"] = "Valid"
+    except Exception as e:
+        print(f"Error checking TLD: {e}")
 
     # Obtém informações WHOIS
-    whois_info = get_whois_info(url)
-    if whois_info and "error" not in whois_info:
-        result["whois"] = whois_info
+    try:
+        whois_info = get_whois_info(url)
+        if whois_info and "error" not in whois_info:
+            result["whois"] = whois_info
+    except Exception as e:
+        print(f"Error getting WHOIS info: {e}")
 
     return result
 

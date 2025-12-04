@@ -8,7 +8,7 @@
     "install": "npm run install:python && npm run install:frontend",
     "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
     "dev:frontend": "cd frontend/phishguard-frontend && next dev",
-    "dev:backend": "cd backend && uvicorn main:app --reload"
+    "dev:backend": "cd backend && python -m uvicorn main:app --reload"
   },
   "dependencies": {
     "concurrently": "^9.1.2"
